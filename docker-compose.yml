@@ -8,9 +8,10 @@ services:
     container_name: adt-se-backend
     ports:
       - "8000:8000"
+      - "9999:9999"
     env_file:
-      - backend/.env
+      - .env
     volumes:
       - ./workspace:/app/workspace
+      - ./data:/app/data
     restart: unless-stopped
-
