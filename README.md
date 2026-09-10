@@ -1,62 +1,152 @@
-# AI Agent Application
+# Agentic Chatbot AI Application
 
-A modular, extensible AI Agent application built with Python, featuring an autonomous AI core, an API backend server, and an interactive frontend client UI.
+[![Python Version](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
+[![Docker](https://img.shields.io/badge/docker-ready-brightgreen.svg)](https://www.docker.com/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-009688.svg)](https://fastapi.tiangolo.com/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.28%2B-FF4B4B.svg)](https://streamlit.io/)
+
+A modular, production-ready AI Agent application built with Python 3.11, featuring an autonomous reasoning agent engine, a high-performance FastAPI backend server, and an interactive Streamlit frontend web interface.
 
 ---
 
-## 📁 Project Structure
+## 📁 Repository Overview
 
 ```text
 .
 ├── .devcontainer/         # VS Code Remote Container configuration
 │   └── devcontainer.json  # Dev container settings and extension definitions
-├── .env                   # Local environment variables (DO NOT COMMIT)
-├── .gitignore             # Standard git ignore list (includes .env, execution artifacts)
-├── ai_agent.py            # Core AI logic, prompt engineering, and tool orchestration
-├── backend.py             # API server application exposing service endpoints
-├── frontend.py            # User interface application for client interactions
-├── requirement.txt        # Python package dependencies
-└── README.md              # Project documentation
+├── .github/workflows/     # CI/CD pipeline definitions
+│   └── ci.yml             # Continuous Integration workflow
+├── .env                   # Local environment configuration file (ignored by Git)
+├── Dockerfile             # Container image build instructions
+├── docker-compose.yml     # Multi-container service orchestration
+├── ai_agent.py            # AI Agent core reasoning, tool invocation, and state management
+├── backend.py             # FastAPI REST service & API gateway exposing endpoints
+├── frontend.py            # Interactive Streamlit client web user interface
+├── requirement.txt        # Primary Python package dependencies
+└── README.md              # Project documentation and operational guide
 ```
 
 ---
 
-## 🛠️ Architecture Overview
+## 🛠️ System Architecture
 
-The system follows a three-tier architecture separating interface, API orchestration, and AI reasoning logic:
+The application is structured around a decoupled three-tier architecture:
 
-- **`ai_agent.py`**: Houses the central autonomous agent logic, reasoning loops, memory state handling, and tool integrations (e.g., LLM prompts, function calling).
-- **`backend.py`**: Acts as the API gateway and backend service provider, routing client requests to the AI agent and delivering responses back to the interface layer.
-- **`frontend.py`**: Provides an intuitive web UI (e.g., Streamlit/Gradio/Web client) for users to send inputs, view real-time model outputs, and inspect conversation history.
+1. **AI Agent Core (`ai_agent.py`)**: Houses autonomous decision-making loops, tool execution routines, prompt templates, and integrations with external LLM providers (e.g., OpenAI, Groq) and search services (e.g., Tavily).
+2. **Backend API Gateway (`backend.py`)**: A FastAPI application running on Uvicorn (port `8000`) that processes client payloads, manages backend state, handles `/health` checks, and exposes interactive OpenAPI documentation.
+3. **Frontend UI (`frontend.py`)**: A Streamlit web interface (port `8501`) providing chat interactions, session control, agent output formatting, and API status monitoring.
 
 ---
 
 ## 💻 Prerequisites
 
-Before setting up the project, ensure you have the following installed on your host machine:
+Ensure your development workstation meets the following minimum requirements:
 
-- **Python**: Version `3.9` or higher
-- **Git**: Latest release
-- **Docker & VS Code** *(Optional)*: Required if you prefer running inside a VS Code Dev Container.
+- **Python**: Version `3.11` or higher installed locally.
+- **Docker Engine & Docker Compose**: Docker Desktop (Windows/macOS) or Docker Engine v20.10+ with Compose V2 plugin (Linux).
+- **Git**: Installed for version control.
 
 ---
 
-## 🚀 Setup & Installation
+## ⚙️ Environment Configuration
 
-### Option 1: Local Setup (Recommended for standard Python workflows)
+Before launching the services via Docker Compose or local execution, you **must create a `.env` configuration file** in the project root directory.
 
-#### 1. Clone the Repository
+### Step 1: Create `.env` File
+
+Copy or create a `.env` file in the root folder:
+
 ```bash
-git clone <repository-url>
-cd <repository-folder>
+# Unix / macOS
+touch .env
+
+# Windows (PowerShell)
+New-Item -ItemType File -Name .env -Force
 ```
 
-#### 2. Create and Activate a Virtual Environment
-Using a virtual environment prevents global package pollution and guarantees reproducible dependency versions.
+### Step 2: Populate Environment Variables
+
+Add your API keys and configuration parameters to `.env`:
+
+```env
+# AI Provider API Keys
+OPENAI_API_KEY=sk-proj-your-openai-key-here
+GROQ_API_KEY=gsk_your_groq_key_here
+TAVILY_API_KEY=tvly-your-tavily-key-here
+
+# Server & Host Settings
+HOST=0.0.0.0
+PORT=8000
+DEBUG=True
+
+# Backend Communication Endpoint (Used by Streamlit Frontend)
+BACKEND_URL=http://127.0.0.1:8000
+```
+
+> ⚠️ **CRITICAL NOTE:**  
+> Never commit your `.env` file or hardcode secret keys into source code. Verify `.env` is listed in `.gitignore`.
+
+---
+
+## 🚀 Execution Path 1: Docker Compose (Recommended)
+
+Docker Compose orchestrates the containerized build and execution of all system services in an isolated environment.
+
+### 1. Build and Start Services
+
+Launch the application containers in detached mode:
+
+```bash
+docker compose up --build -d
+```
+
+### 2. Verify Running Containers
+
+Check service status to verify the backend and frontend containers are active:
+
+```bash
+docker compose ps
+```
+
+### 3. Verify Container Health
+
+Query the backend health check endpoint:
+
+* **Unix / macOS / Linux:**
+  ```bash
+  curl -s http://localhost:8000/health
+  ```
+
+* **Windows PowerShell:**
+  ```powershell
+  Invoke-RestMethod -Uri http://localhost:8000/health
+  ```
+
+* **Expected Output:**
+  ```json
+  {"status": "ok"}
+  ```
+
+### 4. Stop and Clean Up Services
+
+To gracefully stop and remove running containers, networks, and volumes:
+
+```bash
+docker compose down
+```
+
+---
+
+## 🐍 Execution Path 2: Local Native Setup (Non-Docker)
+
+For local development or direct Python debugging without Docker:
+
+### 1. Create and Activate a Python 3.11 Virtual Environment
 
 * **macOS / Linux:**
   ```bash
-  python3 -m venv venv
+  python3.11 -m venv venv
   source venv/bin/activate
   ```
 
@@ -72,100 +162,84 @@ Using a virtual environment prevents global package pollution and guarantees rep
   .\venv\Scripts\Activate.ps1
   ```
 
-#### 3. Install Dependencies
+### 2. Install Project Dependencies
+
+Upgrade package manager and install dependencies:
+
 ```bash
 pip install --upgrade pip
 pip install -r requirement.txt
 ```
 
-#### 4. Environment Configuration & Security Verification
-Create a `.env` file in the project root directory by copying or creating a file based on template values below:
+> **Dependency Note:** If working with standalone backend submodules, always install dependencies from the root `requirement.txt` to maintain version parity across `ai_agent.py`, `backend.py`, and `frontend.py`.
 
-```env
-# API Keys & Sensitive Secrets (DO NOT COMMIT TO GIT)
-OPENAI_API_KEY=your_openai_api_key_here
+### 3. Start the Backend API Service
 
-# Application Service Configuration
-PORT=8000
-HOST=127.0.0.1
-DEBUG=True
+Start the backend application with Uvicorn on port `8000`:
+
+```bash
+uvicorn backend:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-> **🔒 CRITICAL SECURITY CHECK:**  
-> Verify that `.env` is listed in your `.gitignore` file before running any `git add` or `git commit` commands. Never hardcode API keys or commit secrets to public or private source control repositories.
-
----
-
-### Option 2: Setup via VS Code Dev Container
-
-If you prefer containerized development using Docker and VS Code:
-
-1. Open **VS Code**.
-2. Install the **Dev Containers** extension (`ms-vscode-remote.remote-containers`).
-3. Open the project repository folder in VS Code.
-4. When prompted in the lower-right corner, click **"Reopen in Container"** (or press `F1`, type `Dev Containers: Reopen in Container`, and press `Enter`).
-5. VS Code will build the container image and install required packages automatically.
-6. Create your local `.env` file in the root folder as described in step 4 above.
-
----
-
-## 🚦 Running the Application
-
-> **⚠️ Dependency Sequence Notice:**  
-> The `frontend.py` interface communicates directly with the `backend.py` API server. **You must start the backend server first** before launching the frontend client.
-
-### Step 1: Start the Backend Service
-Open a terminal (with your virtual environment activated) and execute:
-
+*Alternatively, execute directly using Python:*
 ```bash
 python backend.py
 ```
 
-*Expected output:* The server will start and listen for requests on `http://127.0.0.1:8000` (or the `PORT` specified in your `.env` file).
+### 4. Start the Frontend UI Service
 
-### Step 2: Start the Frontend Interface
-Open a **second terminal session**, activate your virtual environment, and execute:
+In a **separate terminal window** (with virtual environment activated):
 
 ```bash
-python frontend.py
+streamlit run frontend.py
 ```
-
-*Expected output:* The frontend user interface will initialize and connect to the running backend service. Access the interface via your browser at the local URL printed in the terminal (typically `http://localhost:8501` or `http://localhost:7860`).
 
 ---
 
-## 🔍 Troubleshooting & Common Issues
+## 📍 Service Access & Verification Points
 
-### 1. Missing `.env` File or Key Error (`KeyError: 'OPENAI_API_KEY'`)
-* **Symptom:** Application crashes at startup with an environment variable error or `KeyError`.
-* **Resolution:** 
-  1. Confirm that a file explicitly named `.env` exists in the project root folder.
-  2. Verify that all required keys (e.g., `OPENAI_API_KEY=sk-...`) are defined without quotes or extra whitespace.
-  3. Ensure that python packages like `python-dotenv` are loading variables correctly upon application startup.
+Once the services are running (via Docker or native Python execution), access the applications at the following endpoints:
 
-### 2. Connection Refused / Frontend Cannot Reach Backend
-* **Symptom:** Frontend displays connection timeout, network error, or `ConnectionRefusedError`.
-* **Resolution:**
-  1. Verify `backend.py` is currently running in an active terminal window.
-  2. Check that `backend.py` and `frontend.py` are using matching port configurations (`HOST` and `PORT` settings in `.env`).
-  3. Check local firewall settings if connecting across different containers or host interfaces.
+| Touchpoint / Interface | Access URL | Description |
+| :--- | :--- | :--- |
+| **Backend Health Check** | [http://localhost:8000/health](http://localhost:8000/health) | REST verification route returning service status. |
+| **Interactive API Docs** | [http://localhost:8000/docs](http://localhost:8000/docs) | OpenAPI (Swagger) browser interface for testing routes. |
+| **Frontend Application UI** | [http://localhost:8501](http://localhost:8501) | Streamlit web client interface for interacting with the AI Agent. |
 
-### 3. Residual Execution Artifacts
-* **Symptom:** Workspace clutter or unexpected behavior caused by temporary execution artifacts like `tempCodeRunnerFile.py` or `__pycache__/`.
-* **Resolution:** Ensure standard ignore rules are included in `.gitignore`:
-  ```text
-  .env
-  tempCodeRunnerFile.py
-  __pycache__/
-  *.pyc
-  venv/
-  .vscode/
-  ```
+---
+
+## 🔍 Troubleshooting & Frequently Asked Questions
+
+### 1. Missing `.env` File Error
+* **Symptom:** Application fails on startup with `KeyError: 'OPENAI_API_KEY'` or warnings regarding missing environment secrets.
+* **Solution:** Create `.env` in the root folder as shown in [Environment Configuration](#%EF%B8%8F-environment-configuration). When using Docker Compose, verify that `.env` resides in the same directory as `docker-compose.yml`.
+
+### 2. Port `8000` or Port `8501` Conflicts
+* **Symptom:** Error stating `[Errno 98] Address already in use` or `Bind for 0.0.0.0:8000 failed: port is already allocated`.
+* **Solution:** Identify and stop the process currently occupying the port:
+  * **macOS / Linux:**
+    ```bash
+    lsof -i :8000
+    kill -9 <PID>
+    ```
+  * **Windows PowerShell:**
+    ```powershell
+    Get-Process -Id (Get-NetTCPConnection -LocalPort 8000).OwningProcess | Stop-Process -Force
+    ```
+  * Alternatively, override default ports in your `.env` or adjust host port mapping in `docker-compose.yml`.
+
+### 3. Docker Daemon Execution Failures
+* **Symptom:** Command outputs `Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?`
+* **Solution:** Ensure Docker Desktop is active and running in your system tray. On Linux environments, ensure the service is running via `sudo systemctl start docker` and your user belongs to the `docker` group (`sudo usermod -aG docker $USER`).
+
+### 4. Dependency Mismatches or Imports Error
+* **Symptom:** `ModuleNotFoundError` when executing standalone modules locally.
+* **Solution:** Confirm your Python virtual environment is active (`(venv)` shown in prompt) and re-run `pip install -r requirement.txt`.
 
 ---
 
 ## 🔒 Security Best Practices
 
-1. **Development vs. Production:** Settings like `DEBUG=True` and permissive CORS origins are for local testing only. Ensure `DEBUG` is set to `False` in staging and production environments.
-2. **Secret Management:** Do not output active API keys into console logs or user-facing error messages.
-3. **No Privileged Execution:** Do not run startup commands or scripts using `sudo` or root privileges.
+1. **Keep Secrets Safe:** Do not check credentials into version control. Ensure `.env` is listed in `.gitignore`.
+2. **Production Mode:** Set `DEBUG=False` in staging or production deployments.
+3. **Privilege Isolation:** Avoid running backend or frontend commands with `sudo` or administrator root privileges.
