@@ -36,7 +36,7 @@ jobs:
       - name: Run tests
         run: |
           pip install pytest
-          pytest --tb=short -q || echo "No tests found — skipping"
+          pytest --tb=short -q || echo "No tests found â€” skipping"
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
   docker-build:
@@ -53,5 +53,5 @@ jobs:
           elif [ -f Dockerfile ]; then
             docker build -t adt-se:ci .
           else
-            echo "No Docker config found — skipping"
+            echo "No Docker config found â€” skipping"
           fi
